@@ -19,10 +19,10 @@ var svg = canvas.append("g").attr({
     
     
 queue()
-    .defer(d3.json, "/data/townships.json")
-    .defer(d3.json, "/data/neighborhoods.json")
-    .defer(d3.json, "/data/precincts.blank.json")
-    .defer(d3.csv, "/data/precincts.avg.csv")
+    .defer(d3.json, "data/townships.json")
+    .defer(d3.json, "data/neighborhoods.json")
+    .defer(d3.json, "data/precincts.blank.json")
+    .defer(d3.csv, "data/precincts.avg.csv")
     .await(ready);
 
 function ready(error, town, neigh, blank, avg) {
