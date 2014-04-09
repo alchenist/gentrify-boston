@@ -1,0 +1,81 @@
+Shapefiles (parcels_13 and parcels_14)
+    what's the difference between 13 and 14?
+    convert DBase files (dbf) to csv to get a feel for the data
+    parcel ids are composed of
+        ## | ##### | ###
+        2-digit ward ID 
+        5-digit parcel ID (part 1); pad to 5 digits
+        3-digit secondary parcel ID (part 2); pad to 3 digits
+            in the database, parcel is is stored as #####-### if a secondary id exists
+            
+        in the database, these are two fields:
+            ward
+            parcel
+                if secondary ID exists, stored as #####-###
+            
+        to reconstruct searchable parcel IDs, pad each atomic ID element with 0s on the left to the proper number of digits then concatenate
+        
+        ...just kidding, they're also stored in the pid_long field. pad to 10 digits
+        
+        http://www.cityofboston.gov/assessing/propid.asp was not helpful.
+    convert these to topojson for later use
+        http://bost.ocks.org/mike/map/
+        gdal (ogr2ogr tool) + topojson
+        
+        postponed for now 
+            do we scrape assessment data and shove it in the dbfs? 
+            or store in csv and load separately?
+                seems easier
+                
+    of note: https://github.com/mbostock/shapefile#reader
+        library for parsing streaming shapefiles
+    
+    Google Hangout with Mimi 4/1
+        rental price per room
+            source of data?
+            trulia?
+        west roxbury
+            city workers
+        roslindale
+        redo a public project
+            boston housing
+            old harbor
+        new york times block by block
+        washington street 
+            south of washington not gentrified
+            north of washington = gentrified
+        dorchester
+            polish triangle
+        1970s busing
+            white flight 
+        white return to bps
+        
+        
+    what format do we want to store assessment data in?
+        not sure right now if other fields will be useful (lot size, living area, property type, etc.)
+        want a flexible database! so I can add in columns later if I need to
+        sqlite would be easy but less flexible
+        mongodb? json -> json later
+        ultimately, we're dealing with csv or json
+        or should we modify the dbf?
+    
+    3/7
+        MAJOR ISSUES
+            parcel data is too much to visualize in browser!
+            solutions:
+                bin
+                    by ward or precinct, if I can get the appropriate shapefiles
+                simplify geometries
+                prune out unnecessary data
+                
+                
+    binning
+        bin by precinct (next level up of abstraction)
+            WPD field is made up of ward - precinct - ##?
+            take avg/mdn across all parcels that have data for a particular year in a particular precinct
+    topojson [options] [input file]
+        topojson -e data\parcels_13.mdn.csv -o precincts.mdn.json  --id-property ward_preci -- data\data_request_04072014\precincts.shp 
+        
+        
+    what data do we actually want to visualize?
+        avg/mdn property values for each precinct compared to a citywide average?
