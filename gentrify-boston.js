@@ -8,7 +8,7 @@ var margin = {
 var width = 900 - margin.left - margin.right;
 var height = 600 - margin.bottom - margin.top;
 
-var canvas = d3.select("body").append("svg").attr({
+var canvas = d3.select(".vis").append("svg").attr({
     width: width + margin.left + margin.right,
     height: height + margin.top + margin.bottom
     });
@@ -69,6 +69,16 @@ function ready(error, town, neigh, blank, avg) {
         .data(n.features)
       .enter().append("path")
         .attr("d", path);
+        
+    svg.append("g")
+        .attr("class", "nlabels")
+      .selectAll(".nlabel")
+        .data(n.features)
+      .enter().append("text")
+        .attr("class", "nlabel")
+        .attr("transform", function(d) { return "translate(" + path.centroid(d) +")" })
+        .attr("dy", ".35em")
+        .text(function(d) {  return d.properties.Name });
     
     // shunt the csv data into an object for easier lookup
     avg.forEach(function (d) {
@@ -88,8 +98,6 @@ function ready(error, town, neigh, blank, avg) {
             }
         }
     });
-    
-    console.log(databyyear);
     
     yearlist = Object.keys(years);    
     
