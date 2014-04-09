@@ -8,7 +8,7 @@ var margin = {
 var width = 900 - margin.left - margin.right;
 var height = 600 - margin.bottom - margin.top;
 
-var canvas = d3.select(".vis").append("svg").attr({
+var canvas = d3.select("#vis").append("svg").attr({
     width: width + margin.left + margin.right,
     height: height + margin.top + margin.bottom
     });
