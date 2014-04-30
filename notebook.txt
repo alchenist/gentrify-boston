@@ -79,3 +79,14 @@ Shapefiles (parcels_13 and parcels_14)
         
     what data do we actually want to visualize?
         avg/mdn property values for each precinct compared to a citywide average?
+        
+    todo:
+        implement dynamic legend (for the color scale)
+        * implement axis for the brush
+        zoom and pan!!!!
+        try other metrics
+        add play functionality
+        add callouts for specific districts
+        add mouseover tips
+        fix label placement (manually place some of them..)
+        
