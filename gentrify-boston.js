@@ -49,7 +49,7 @@ function ready(error, town, neigh, blank, avg) {
     var projection = d3.geo.mercator()
         .scale(130000)
          .center([-71.06361, 42.31806])
-        .translate([width/2, height/2]);
+        .translate([(width-300)/2 + 300, height/2]);
     var path = d3.geo.path()
         .projection(projection);
         
@@ -126,8 +126,11 @@ function ready(error, town, neigh, blank, avg) {
         .range([0, width])
         .clamp(true);
         
-    var color = d3.scale.quantize()
-        .range(['rgb(165,0,38)','rgb(215,48,39)','rgb(244,109,67)','rgb(253,174,97)','rgb(254,224,144)','rgb(255,255,191)','rgb(224,243,248)','rgb(171,217,233)','rgb(116,173,209)','rgb(69,117,180)','rgb(49,54,149)']);
+    var color = d3.scale.quantile()
+        .range(['rgb(213,62,79)','rgb(244,109,67)','rgb(253,174,97)','rgb(254,224,139)','rgb(255,255,191)','rgb(230,245,152)','rgb(171,221,164)','rgb(102,194,165)','rgb(50,136,189)']);
+        
+    var key = d3.scale.log()
+        .range([height-100, 0]);
         
     var brush = d3.svg.brush()
         .x(x)
@@ -141,9 +144,21 @@ function ready(error, town, neigh, blank, avg) {
         .outerTickSize(0)
         .ticks(d3.time.years, 2)
     
+    var tFormat = d3.format(".3s");
+    
+    var keyAxis = d3.svg.axis()
+        .scale(key)
+        .orient("right")
+        .tickSize(13)
+        .tickFormat(function(d) { return tFormat(d) });
+        
+    var keyG = oSvg.append("g")
+        .attr("class", "key axis")
+        .attr("transform", "translate(" + (width - 50) + ",0)");
+    
     var sliderAxis = oSvg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + (75) + ")")
+        .attr("class", "slideraxis")
+        .attr("transform", "translate(0," + (height - 25) + ")")
         .call(xAxis);
         
         
@@ -156,7 +171,7 @@ function ready(error, town, neigh, blank, avg) {
     
     var handle = slider.append("circle")
         .attr("class", "handle")
-        .attr("transform", "translate(0," + (75) + ")")
+        .attr("transform", "translate(0," + (height - 25) + ")")
         .attr("r", 7);
         
     function brushed() {
@@ -173,13 +188,37 @@ function ready(error, town, neigh, blank, avg) {
     }
     
     function redraw() {
+        var ext = d3.extent(databyyear[curYear]);
         color.domain(databyyear[curYear]);
+        key.domain(ext);
+        keyAxis.tickValues([ext[0]].concat(color.quantiles()).concat(ext[1]));
+        redrawLegend();
         precincts
             .attr("fill", function(d) { 
                 return (d.id in data) ? color(data[d.id][curYear]) : "none"
             })
     }
     
+    function redrawLegend() {
+        key.range([height - 100, 0]);
+        keyG.selectAll("rect").data(color.range().map(function(c) {
+                var d = color.invertExtent(c);
+                if (d[0] == null) d[0] = key.domain()[0];
+                if (d[1] == null) d[1] = key.domain()[1];
+                return d
+            }))
+            .attr("y", function(d) { return key(d[1]) })
+            .attr("height", function(d) { return key(d[0]) - key(d[1]) })
+            .style("fill", function(d) { return color(d[0]) })
+          .enter().append("rect")
+            .attr("width", 8)
+            .attr("y", function(d) { return key(d[1]) })
+            .attr("height", function(d) { return key(d[0]) - key(d[1]) })
+            .style("fill", function(d) { return color(d[0]) });
+        keyG.call(keyAxis);
+        keyG.attr("transform", "translate(" + (width - 50) + ",0)");
+    }
+     
     function rescale() {
         width = parseInt(d3.select("#vis").style("width")) - margin.left - margin.right;
         height = parseInt(d3.select("#vis").style("height")) - margin.bottom - margin.top;
@@ -189,8 +228,9 @@ function ready(error, town, neigh, blank, avg) {
             }); 
         x.range([0, width]);
         sliderAxis.call(xAxis);
-        /* sliderAxis.attr("transform", "translate(0," + (height - 25) + ")");
-        handle.attr("transform", "translate(0," + (height - 25) + ")"); */
+        redrawLegend();
+        sliderAxis.attr("transform", "translate(0," + (height - 25) + ")");
+        handle.attr("transform", "translate(0," + (height - 25) + ")");
     }
     
     window.addEventListener("resize", rescale, false);  

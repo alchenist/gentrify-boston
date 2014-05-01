@@ -3,6 +3,7 @@
 <head>
 
     <title>Property Assessment Data over Time in Boston</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700italic,500,300,700' rel='stylesheet' type='text/css'>
     <style type="text/css">
         #canvas {
             background: #7f7f7f;
@@ -18,16 +19,16 @@
             fill: none;
             stroke: white;
             stroke-width: 1px;
-            stroke-opacity: 0.5;
+            stroke-opacity: 1;
         }
         
         .nlabel {
-            font-family: sans-serif;
+            font-family: 'Roboto', sans-serif;
             font-size: 9px;
             font-weight:bold;
             text-anchor: middle;
             fill: black;
-            opacity:.85;
+            opacity:.65;
         }
         
         .r {
@@ -45,7 +46,7 @@
             stroke-width: 1px;
         }
         
-        .domain {
+        .slideraxis .domain {
             fill: none;
             stroke-width: 4px;
             stroke: white;
@@ -53,10 +54,47 @@
             stroke-linecap: round;
         }
         
+        .key .domain {
+            fill:none;
+        }
+        
         .tick {
-            font-family: sans-serif;
+            font-family: 'Roboto', sans-serif;
             font-size: 10px;
             fill: white;
+        }
+        
+        .key .tick line{
+            stroke: white;
+        }
+        
+        #info {
+            position:absolute;
+            top:0px;
+            left:50px;
+            width: 300px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        .info-title {
+            padding: 10px 10px 10px 10px;
+            font-weight: 700;
+            font-style:italic;
+            color:white;
+            background:black;
+            font-size: 36px;
+            line-height: 36px;
+            box-shadow: 0 0 5px #BBB;   
+        }
+        
+        .info-box {
+            padding: 10px 10px 10px 10px;
+            font-weight: 400;
+            color:#afadad;
+            background:white;
+            font-size: 12px;
+            line-height: 14.4px;
+            box-shadow: 0 0 5px #BBB;   
         }
     </style>
 </head>
@@ -68,7 +106,15 @@
 <script src="http://d3js.org/queue.v1.min.js"></script>
 
 <div id="vis" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"></div>
-<div id="overlay" style="position:absolute;bottom:0;left:0;width:100%;height:200px;overflow:hidden;"></div>
+<div id="overlay" style="position:absolute;bottom:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none">
+    <div id="info">
+        <div id="title" class="info-title">Gentrification in Boston</div>
+        <div id="about" class="info-box">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas placerat ante cursus dapibus tempus. In mattis diam et condimentum sodales. Nam cursus purus tellus, imperdiet condimentum massa sollicitudin ut. Nunc gravida, lectus eget ultrices scelerisque, diam erat eleifend dui, nec ullamcorper dui dui ac quam. Integer feugiat, leo in faucibus blandit, libero dui faucibus metus, et pulvinar massa erat a turpis. Ut id porttitor eros, a interdum lorem. Nullam iaculis nisi nulla, eget vestibulum augue imperdiet at. Donec quis lobortis neque. Nunc fringilla congue rutrum.
+
+Nulla quam enim, commodo quis nulla at, cursus tempus neque. Praesent turpis neque, dapibus sed urna vel, tempor cursus nisi. Nunc id sollicitudin ante. Nullam mattis ipsum ac erat porttitor, quis semper magna porta. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc quam magna, eleifend dapibus risus sit amet, faucibus pretium nibh. Aenean vitae vestibulum augue. Donec vel turpis eget neque pretium fermentum.</div>
+    </div>
+
+</div>
 
 <script src="gentrify-boston.js"></script>
 

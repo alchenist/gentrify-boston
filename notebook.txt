@@ -81,12 +81,17 @@ Shapefiles (parcels_13 and parcels_14)
         avg/mdn property values for each precinct compared to a citywide average?
         
     todo:
-        implement dynamic legend (for the color scale)
+        * implement dynamic legend (for the color scale)
+            new scale for legend
+                domain: range of property values for the year
+                range: width of legend onscreen
+            get quantiles
+            use quantiles as data for a 
         * implement axis for the brush
+        * fullscreen vis (with dynamic rescaling)
         zoom and pan!!!!
         try other metrics
         add play functionality
-        add callouts for specific districts
         add mouseover tips
-        fix label placement (manually place some of them..)
+        * fix label placement (manually place some of them..)
         
