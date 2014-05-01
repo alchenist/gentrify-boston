@@ -26,6 +26,15 @@ var oSvg = overlayCanvas.append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
     
+var bg = svg.append("rect").attr({
+    id: "bg",
+    x: -margin.left,
+    y: -margin.top,
+    width: width + margin.left + margin.right,
+    height: height +margin.top + margin.bottom,
+    fill: "#7f7f7f"
+})
+    
 queue()
     .defer(d3.json, "data/townships.json")
     .defer(d3.json, "data/neighborhoods.json")
@@ -51,16 +60,23 @@ function ready(error, town, neigh, blank, avg) {
         .translate([(width-300)/2 + 300, height/2]);
     var path = d3.geo.path()
         .projection(projection);
+    var zoom = d3.behavior.zoom()
+        .scaleExtent([1, 5])
+        .on("zoom", zoomed)
         
     // draw map features
-    var townships = svg.append("g")
+    var features = svg.append("g")
+        .attr("class", "features");
+        
+    var townships = features.append("g")
         .attr("class", "townships")
+        .attr("stroke-width", "1px")
       .selectAll(".township")
         .data(t.features)
       .enter().append("path")
         .attr("d", path);
     
-    var precincts = svg.append("g")
+    var precincts = features.append("g")
         .attr("class", "precincts")
       .selectAll(".precinct")
         .data(p.features)
@@ -70,16 +86,19 @@ function ready(error, town, neigh, blank, avg) {
         .attr("fill", "#FFFFFF")
         .on("mouseover", function(d) { console.log(d.id) });
         
-    var neighborhoods = svg.append("g")
+    var neighborhoods = features.append("g")
         .attr("class", "neighborhoods")
+        .attr("stroke-width", "1px")
       .selectAll(".neighborhood")
         .data(n.features)
       .enter().append("path")
         .attr("class", "neighborhood")
-        .attr("d", path);
+        .attr("d", path)
+        .on("mouseover", function(d) { console.log(d.properties.Name) });
         
     svg.append("g")
         .attr("class", "nlabels")
+        .attr("font-size", "9px")
       .selectAll(".nlabel")
         .data(n.features)
       .enter().append("text")
@@ -95,6 +114,8 @@ function ready(error, town, neigh, blank, avg) {
             else {return "0.2em"}
         })
         .text(function(d) { return d.properties.Name });
+        
+    svg.call(zoom);
     
     // shunt the csv data into an object for easier lookup
     avg.forEach(function (d) {
@@ -143,6 +164,7 @@ function ready(error, town, neigh, blank, avg) {
     var xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
+        .tickSize(6)
         .outerTickSize(0)
         .ticks(d3.time.years, 1);
     
@@ -169,6 +191,10 @@ function ready(error, town, neigh, blank, avg) {
       .selectAll("rect")
         .attr("y", -4)
         .attr("height", 8);
+        
+    slider.selectAll(".extent")
+        .attr("rx", 5)
+        .attr("ry", 5); 
     
     function brushed() {
         var temp = curYear;
@@ -185,6 +211,14 @@ function ready(error, town, neigh, blank, avg) {
             .duration(brush.empty() ? 0 : 600 * (extent[1].getFullYear() - extent[0].getFullYear()))
             .call(brush.extent([extent[1], extent[1]]))
             .call(brush.event);
+    }
+    
+    function zoomed() {
+        features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg.selectAll(".neighborhoods, townships")
+            .attr("stroke-width", (1/d3.event.scale) + "px");
+        svg.selectAll(".nlabels").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
+            .attr("font-size", (9/d3.event.scale) + "px");
     }
     
     function redraw() {
@@ -224,14 +258,22 @@ function ready(error, town, neigh, blank, avg) {
         width = parseInt(d3.select("#vis").style("width")) - margin.left - margin.right;
         height = parseInt(d3.select("#vis").style("height")) - margin.bottom - margin.top;
         
+        svg.select("#bg").attr({
+            width: width + margin.left + margin.right,
+            height: height + margin.top + margin.bottom
+        });
         overlayCanvas.attr({
             width: width + margin.left + margin.right,
             height: height + margin.top + margin.bottom
-            }); 
+        }); 
         x.range([0, width]);
         sliderAxis.call(xAxis);
         sliderAxis.attr("transform", "translate(0," + (height - 25) + ")");
-        slider.attr("transform", "translate(0," + (height - 25) + ")");
+        brush.x(x); // doesn't play nicely when resized in the middle of transition
+        svg.select(".slider")
+            .attr("transform", "translate(0," + (height -25) + ")")
+            .call(brush)
+            .call(brush.event);
         redrawLegend();
     }
     

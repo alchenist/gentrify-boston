@@ -12,20 +12,18 @@
         .townships {
             fill: #222222;
             stroke: #7f7f7f;
-            stroke-width:1px;
         }
         
         .neighborhoods {
-            fill: none;
+            fill: #22222;
+            fill-opacity: 0.01;
             stroke: white;
-            stroke-width: 1px;
             stroke-opacity: 1;
         }
         
         .nlabel {
             font-family: 'Roboto', sans-serif;
-            font-size: 9px;
-            font-weight:bold;
+            font-weight: 700;
             text-anchor: middle;
             fill: black;
             opacity:.65;
@@ -47,7 +45,7 @@
         }
         
         .slider .extent {
-            fill: white;
+            fill: #afadad;
         }
         
         .slideraxis .domain {
@@ -68,7 +66,7 @@
             fill: white;
         }
         
-        .key .tick line{
+        .tick line{
             stroke: white;
         }
         
@@ -81,7 +79,7 @@
         }
         
         .info-title {
-            padding: 10px 10px 10px 10px;
+            padding: 15px 10px 15px 10px;
             font-weight: 700;
             font-style:italic;
             color:white;
@@ -112,10 +110,10 @@
 <div id="vis" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;"></div>
 <div id="overlay" style="position:absolute;bottom:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none">
     <div id="info">
-        <div id="title" class="info-title">Gentrification in Boston</div>
-        <div id="about" class="info-box">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas placerat ante cursus dapibus tempus. In mattis diam et condimentum sodales. Nam cursus purus tellus, imperdiet condimentum massa sollicitudin ut. Nunc gravida, lectus eget ultrices scelerisque, diam erat eleifend dui, nec ullamcorper dui dui ac quam. Integer feugiat, leo in faucibus blandit, libero dui faucibus metus, et pulvinar massa erat a turpis. Ut id porttitor eros, a interdum lorem. Nullam iaculis nisi nulla, eget vestibulum augue imperdiet at. Donec quis lobortis neque. Nunc fringilla congue rutrum.
-        </br>
-        Nulla quam enim, commodo quis nulla at, cursus tempus neque. Praesent turpis neque, dapibus sed urna vel, tempor cursus nisi. Nunc id sollicitudin ante. Nullam mattis ipsum ac erat porttitor, quis semper magna porta. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nunc quam magna, eleifend dapibus risus sit amet, faucibus pretium nibh. Aenean vitae vestibulum augue. Donec vel turpis eget neque pretium fermentum.</div>
+        <div id="title" class="info-title">Boston: </br> Then and Now</div>
+        <div id="about" class="info-box"><p> Explore average property values by precinct over the last two decades as assessed by the <a href="http://www.cityofboston.gov/assessing/search/">City of Boston</a>. Click and drag anywhere on the timeline to play a segment of time. </p> 
+        <p> Precincts are colored by quantile. Data includes nonresidential properties. </p>
+        </div>
     </div>
 
 </div>

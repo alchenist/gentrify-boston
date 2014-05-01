@@ -82,6 +82,7 @@ Shapefiles (parcels_13 and parcels_14)
         
     todo:
         * implement dynamic legend (for the color scale)
+            http://bl.ocks.org/mbostock/4573883
             new scale for legend
                 domain: range of property values for the year
                 range: width of legend onscreen
@@ -91,7 +92,7 @@ Shapefiles (parcels_13 and parcels_14)
         * fullscreen vis (with dynamic rescaling)
         zoom and pan!!!!
         try other metrics
-        add play functionality
+        *  play functionality
         add mouseover tips
         * fix label placement (manually place some of them..)
         
