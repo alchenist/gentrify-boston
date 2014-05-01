@@ -15,10 +15,9 @@
         }
         
         .neighborhoods {
-            fill: #22222;
-            fill-opacity: 0.01;
-            stroke: white;
-            stroke-opacity: 1;
+            fill: none;
+            stroke: #222222;
+            stroke-opacity: .5;
         }
         
         .nlabel {
@@ -98,6 +97,12 @@
             line-height: 14.4px;
             box-shadow: 0 0 5px #BBB;   
         }
+        
+        #hover {
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 17px;
+        }
     </style>
 </head>
 
@@ -111,8 +116,13 @@
 <div id="overlay" style="position:absolute;bottom:0;left:0;width:100%;height:100%;overflow:hidden;pointer-events:none">
     <div id="info">
         <div id="title" class="info-title">Boston: </br> Then and Now</div>
-        <div id="about" class="info-box"><p> Explore average property values by precinct over the last two decades as assessed by the <a href="http://www.cityofboston.gov/assessing/search/">City of Boston</a>. Click and drag anywhere on the timeline to play a segment of time. </p> 
+        <div id="about" class="info-box"><p> Explore average property values by precinct over the last two decades as assessed by the <a href="http://www.cityofboston.gov/assessing/search/">City of Boston</a> in this interactive map. Click and drag anywhere on the timeline to play a segment of time. </p> 
         <p> Precincts are colored by quantile. Data includes nonresidential properties. </p>
+        </div>
+        </br>
+        <div id="hover" class="info-box">
+            <div id="current">Boston in 1985</div>
+            <div id="avg">Average property value: </div>
         </div>
     </div>
 

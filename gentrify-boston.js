@@ -49,6 +49,10 @@ function ready(error, town, neigh, blank, avg) {
     var yearlist = [];
     var curYear = '1985';
     var start = false;
+    var highlighted = null;
+    var format = d3.time.format("%Y");
+    var tFormat = d3.format(".3s");
+    var nFormat = d3.format(",.0f");
     
     // setup
     var p = topojson.feature(blank, blank.objects.precinctsgeo);
@@ -84,7 +88,14 @@ function ready(error, town, neigh, blank, avg) {
         .attr("class", function(d) { return "precinct " + d.id })
         .attr("d", path)
         .attr("fill", "#FFFFFF")
-        .on("mouseover", function(d) { console.log(d.id) });
+        .on("mouseover", function(d) { 
+            ident = "Ward " + d.id.slice(0,2) + ", Precinct " + d.id.slice(2,4);
+            d3.select("#current")
+                .text(ident + " in " + curYear);
+            d3.select("#avg")
+                .text("Average property value: $" + nFormat(data[d.id][curYear]));
+            highlighted = d.id;
+        });
         
     var neighborhoods = features.append("g")
         .attr("class", "neighborhoods")
@@ -93,8 +104,7 @@ function ready(error, town, neigh, blank, avg) {
         .data(n.features)
       .enter().append("path")
         .attr("class", "neighborhood")
-        .attr("d", path)
-        .on("mouseover", function(d) { console.log(d.properties.Name) });
+        .attr("d", path);
         
     svg.append("g")
         .attr("class", "nlabels")
@@ -137,9 +147,6 @@ function ready(error, town, neigh, blank, avg) {
     });
     
     yearlist = Object.keys(years); // keeps track of years
-    
-    var format = d3.time.format("%Y");
-    var tFormat = d3.format(".3s");
     
     // various scales
     var x = d3.time.scale()
@@ -215,7 +222,7 @@ function ready(error, town, neigh, blank, avg) {
     
     function zoomed() {
         features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        svg.selectAll(".neighborhoods, townships")
+        svg.selectAll(".townships, .neighborhoods")
             .attr("stroke-width", (1/d3.event.scale) + "px");
         svg.selectAll(".nlabels").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
             .attr("font-size", (9/d3.event.scale) + "px");
@@ -231,6 +238,18 @@ function ready(error, town, neigh, blank, avg) {
             .attr("fill", function(d) { 
                 return (d.id in data) ? color(data[d.id][curYear]) : "none"
             });
+            
+        // update info box
+        id = highlighted;
+        if (id) {
+            ident = "Ward " + id.slice(0,2) + ", Precinct " + id.slice(2,4);
+            d3.select("#current")
+                .text(ident + " in " + curYear);
+            d3.select("#avg")
+                .text("Average property value: " + nFormat(data[id][curYear]));
+        } else {
+            d3.selectAll("#current, #avg").text(null);
+        }
     }
     
     function redrawLegend() {
