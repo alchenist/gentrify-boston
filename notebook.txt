@@ -95,3 +95,24 @@ Shapefiles (parcels_13 and parcels_14)
         add mouseover tips
         * fix label placement (manually place some of them..)
         
+        
+ /* slider.selectAll(".extent,.resize")
+        .remove(); */
+    
+    /* var handle = slider.append("circle")
+        .attr("class", "handle")
+        .attr("transform", "translate(0," + (height - 25) + ")")
+        .attr("r", 7); */
+        
+    /* function brushed() {
+        var pos = brush.extent()[1];
+        
+        if (d3.event.sourceEvent) {
+            pos = x.invert(d3.mouse(this)[0]);
+            brush.extent([pos, pos]);
+        }
+        
+        curYear = format(pos);
+        handle.attr("cx", x(pos));
+        redraw();
+    } */

@@ -12,7 +12,7 @@ var overlayCanvas = d3.select("#overlay").append("svg").attr({
     width: width + margin.left + margin.right,
     height: height + margin.top + margin.bottom
     })
-    .attr("id", "overlay"); 
+    .attr("id", "ocanvas"); 
     
 var canvas = d3.select("#vis").append("svg").attr("viewBox", "0 0 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
     .attr("preserveAspectRatio", "xMidYMid meet")
@@ -25,8 +25,6 @@ var svg = canvas.append("g").attr({
 var oSvg = overlayCanvas.append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
-
-
     
 queue()
     .defer(d3.json, "data/townships.json")
@@ -40,7 +38,8 @@ function ready(error, town, neigh, blank, avg) {
     var databyyear = {};
     var years = {};
     var yearlist = [];
-    var curYear;
+    var curYear = '1985';
+    var start = false;
     
     // setup
     var p = topojson.feature(blank, blank.objects.precinctsgeo);
@@ -53,7 +52,7 @@ function ready(error, town, neigh, blank, avg) {
     var path = d3.geo.path()
         .projection(projection);
         
-    // draw maps
+    // draw map features
     var townships = svg.append("g")
         .attr("class", "townships")
       .selectAll(".township")
@@ -66,9 +65,7 @@ function ready(error, town, neigh, blank, avg) {
       .selectAll(".precinct")
         .data(p.features)
       .enter().append("path")
-        .attr("class", function(d) { 
-            return "precinct " + d.id 
-        })
+        .attr("class", function(d) { return "precinct " + d.id })
         .attr("d", path)
         .attr("fill", "#FFFFFF")
         .on("mouseover", function(d) { console.log(d.id) });
@@ -78,6 +75,7 @@ function ready(error, town, neigh, blank, avg) {
       .selectAll(".neighborhood")
         .data(n.features)
       .enter().append("path")
+        .attr("class", "neighborhood")
         .attr("d", path);
         
     svg.append("g")
@@ -86,9 +84,9 @@ function ready(error, town, neigh, blank, avg) {
         .data(n.features)
       .enter().append("text")
         .attr("class", function(d) {
-            if (d.properties.Name in {"North End": 0, "Downtown": 0, "Leather District": 0, "South Boston Waterfront": 0}) {return "nlabel l"}
-            else if (d.properties.Name in {"West End": 0, "Beacon Hill": 0, "Back Bay": 0, "Bay Village": 0, "Longwood Medical Area": 0}) {return "nlabel r"}
-            else {return "nlabel"}
+            if (d.properties.Name in {"North End": 0, "Downtown": 0, "Leather District": 0, "South Boston Waterfront": 0}) { return "nlabel l" }
+            else if (d.properties.Name in {"West End": 0, "Beacon Hill": 0, "Back Bay": 0, "Bay Village": 0, "Longwood Medical Area": 0}) { return "nlabel r" }
+            else { return "nlabel" }
         })
         .attr("transform", function(d) { return "translate(" + path.centroid(d) +")" })
         .attr("dy", function(d) {
@@ -96,7 +94,7 @@ function ready(error, town, neigh, blank, avg) {
             else if (d.properties.Name == "Leather District" || d.properties.Name == "Back Bay") {return "0em"}
             else {return "0.2em"}
         })
-        .text(function(d) {  return d.properties.Name });
+        .text(function(d) { return d.properties.Name });
     
     // shunt the csv data into an object for easier lookup
     avg.forEach(function (d) {
@@ -117,10 +115,12 @@ function ready(error, town, neigh, blank, avg) {
         }
     });
     
-    yearlist = Object.keys(years);    
+    yearlist = Object.keys(years); // keeps track of years
     
-    var format = d3.time.format("%Y")
+    var format = d3.time.format("%Y");
+    var tFormat = d3.format(".3s");
     
+    // various scales
     var x = d3.time.scale()
         .domain(d3.extent(yearlist, function(d) { return format.parse(d) }))
         .range([0, width])
@@ -132,19 +132,19 @@ function ready(error, town, neigh, blank, avg) {
     var key = d3.scale.log()
         .range([height-100, 0]);
         
+    // brushes and axes
     var brush = d3.svg.brush()
         .x(x)
-        .extent([0, 0])
         .on("brush", brushed)
+        .on("brushend", brushended)
+        .extent(x.domain())
         .clamp(true);
         
     var xAxis = d3.svg.axis()
         .scale(x)
         .orient("bottom")
         .outerTickSize(0)
-        .ticks(d3.time.years, 2)
-    
-    var tFormat = d3.format(".3s");
+        .ticks(d3.time.years, 1);
     
     var keyAxis = d3.svg.axis()
         .scale(key)
@@ -161,30 +161,30 @@ function ready(error, town, neigh, blank, avg) {
         .attr("transform", "translate(0," + (height - 25) + ")")
         .call(xAxis);
         
-        
     var slider = oSvg.append("g")
         .attr("class", "slider")
-        .call(brush);
+        .attr("transform", "translate(0," + (height-25) + ")")
+        .call(brush)
+        .call(brush.event)
+      .selectAll("rect")
+        .attr("y", -4)
+        .attr("height", 8);
     
-    slider.selectAll(".extent,.resize")
-        .remove();
-    
-    var handle = slider.append("circle")
-        .attr("class", "handle")
-        .attr("transform", "translate(0," + (height - 25) + ")")
-        .attr("r", 7);
-        
     function brushed() {
-        var pos = brush.extent()[1];
-        
-        if (d3.event.sourceEvent) {
-            pos = x.invert(d3.mouse(this)[0]);
-            brush.extent([pos, pos]);
-        }
-        
-        curYear = format(pos);
-        handle.attr("cx", x(pos));
-        redraw();
+        var temp = curYear;
+        curYear = format(brush.extent()[0]);
+        if (curYear != temp) redraw();
+    }
+    
+    function brushended() {
+        if (!d3.event.sourceEvent && !start) return;
+        start = false;
+        var extent = brush.extent();
+        d3.select(this).transition()
+            .ease("linear")
+            .duration(brush.empty() ? 0 : 600 * (extent[1].getFullYear() - extent[0].getFullYear()))
+            .call(brush.extent([extent[1], extent[1]]))
+            .call(brush.event);
     }
     
     function redraw() {
@@ -193,10 +193,10 @@ function ready(error, town, neigh, blank, avg) {
         key.domain(ext);
         keyAxis.tickValues([ext[0]].concat(color.quantiles()).concat(ext[1]));
         redrawLegend();
-        precincts
+        precincts.transition().duration(150)
             .attr("fill", function(d) { 
                 return (d.id in data) ? color(data[d.id][curYear]) : "none"
-            })
+            });
     }
     
     function redrawLegend() {
@@ -209,7 +209,7 @@ function ready(error, town, neigh, blank, avg) {
             }))
             .attr("y", function(d) { return key(d[1]) })
             .attr("height", function(d) { return key(d[0]) - key(d[1]) })
-            .style("fill", function(d) { return color(d[0]) })
+            .style("fill", function(d) { return color(d[0]) }) 
           .enter().append("rect")
             .attr("width", 8)
             .attr("y", function(d) { return key(d[1]) })
@@ -219,23 +219,27 @@ function ready(error, town, neigh, blank, avg) {
         keyG.attr("transform", "translate(" + (width - 50) + ",0)");
     }
      
+    // keep design somewhat responsive
     function rescale() {
         width = parseInt(d3.select("#vis").style("width")) - margin.left - margin.right;
         height = parseInt(d3.select("#vis").style("height")) - margin.bottom - margin.top;
+        
         overlayCanvas.attr({
             width: width + margin.left + margin.right,
             height: height + margin.top + margin.bottom
             }); 
         x.range([0, width]);
         sliderAxis.call(xAxis);
-        redrawLegend();
         sliderAxis.attr("transform", "translate(0," + (height - 25) + ")");
-        handle.attr("transform", "translate(0," + (height - 25) + ")");
+        slider.attr("transform", "translate(0," + (height - 25) + ")");
+        redrawLegend();
     }
     
-    window.addEventListener("resize", rescale, false);  
-        
-    curYear = '1985';
+    window.addEventListener("resize", rescale, false);
+
     redraw();
+    start = true;
+    oSvg.call(brush.extent(x.domain()))   
+        .call(brush.event);
 }
 
