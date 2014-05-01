@@ -246,7 +246,7 @@ function ready(error, town, neigh, blank, avg) {
             d3.select("#current")
                 .text(ident + " in " + curYear);
             d3.select("#avg")
-                .text("Average property value: " + nFormat(data[id][curYear]));
+                .text("Average property value: $" + nFormat(data[id][curYear]));
         } else {
             d3.selectAll("#current, #avg").text(null);
         }
