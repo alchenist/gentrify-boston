@@ -90,7 +90,7 @@ Shapefiles (parcels_13 and parcels_14)
             use quantiles as data for a 
         * implement axis for the brush
         * fullscreen vis (with dynamic rescaling)
-        zoom and pan!!!!
+        * zoom and pan!!!!
         try other metrics
         *  play functionality
         add mouseover tips
