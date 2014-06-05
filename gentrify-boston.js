@@ -17,6 +17,13 @@ var overlayCanvas = d3.select("#overlay").append("svg").attr({
 var canvas = d3.select("#vis").append("svg").attr("viewBox", "0 0 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("id", "canvas");
+    
+var rank = d3.select("#rank").append("svg")
+    .attr({
+        width: 280,
+        height: 80
+    })
+    .attr("id", "rcanvas");
 
 var svg = canvas.append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
@@ -24,6 +31,10 @@ var svg = canvas.append("g").attr({
     
 var oSvg = overlayCanvas.append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
+    });
+    
+var rSvg = rank.append("g").attr({
+        transform: "translate(10,10)"
     });
     
 var bg = svg.append("rect").attr({
@@ -39,11 +50,13 @@ queue()
     .defer(d3.json, "data/townships.json")
     .defer(d3.json, "data/neighborhoods.json")
     .defer(d3.json, "data/precincts.blank.json")
-    .defer(d3.csv, "data/precincts.avg.csv")
+    .defer(d3.csv, "data/precincts.sqft.avg.csv")
+    .defer(d3.csv, "data/precincts.sqft.avg.per.csv")
     .await(ready);
 
-function ready(error, town, neigh, blank, avg) {
+function ready(error, town, neigh, blank, avg, per) {
     var data = {};
+    var perc = {};
     var databyyear = {};
     var years = {};
     var yearlist = [];
@@ -53,6 +66,7 @@ function ready(error, town, neigh, blank, avg) {
     var format = d3.time.format("%Y");
     var tFormat = d3.format(".3s");
     var nFormat = d3.format(",.0f");
+    var zFormat = d3.format("04d");
     
     // setup
     var p = topojson.feature(blank, blank.objects.precinctsgeo);
@@ -93,8 +107,16 @@ function ready(error, town, neigh, blank, avg) {
             d3.select("#current")
                 .text(ident + " in " + curYear);
             d3.select("#avg")
-                .text("Average property value: $" + nFormat(data[d.id][curYear]));
+                .text("Average price/square foot: $" + nFormat(data[d.id][curYear]));
             highlighted = d.id;
+            rSvg.selectAll("circle")
+                .data(perc[d.id])
+                .attr("cx", function(e) { return rankX(format.parse(e[0])) })
+                .attr("cy", function(e) { return rankY(e[1]) })
+              .enter().append("circle")
+                .attr("cx", function(e) { return rankX(format.parse(e[0])) })
+                .attr("cy", function(e) { return rankY(e[1]) })
+                .attr("r", 1);
         });
         
     var neighborhoods = features.append("g")
@@ -127,6 +149,7 @@ function ready(error, town, neigh, blank, avg) {
         
     svg.call(zoom);
     
+    
     // shunt the csv data into an object for easier lookup
     avg.forEach(function (d) {
         var id = d.ward_preci;
@@ -146,6 +169,15 @@ function ready(error, town, neigh, blank, avg) {
         }
     });
     
+    per.forEach(function (d) {
+        var id = zFormat(+d.ward_preci);
+        delete d.ward_preci;
+        perc[id] = [];
+        for (v in d) {
+            perc[id].push([v, +d[v]])
+        };
+    });
+    
     yearlist = Object.keys(years); // keeps track of years
     
     // various scales
@@ -159,6 +191,14 @@ function ready(error, town, neigh, blank, avg) {
         
     var key = d3.scale.log()
         .range([height-100, 0]);
+        
+    var rankX = d3.time.scale()
+        .domain(d3.extent(yearlist, function(d) { return format.parse(d) }))
+        .range([0, 260]);
+        
+    var rankY = d3.scale.linear()
+        .domain([0, 1])
+        .range([60, 1]);
         
     // brushes and axes
     var brush = d3.svg.brush()
@@ -180,6 +220,14 @@ function ready(error, town, neigh, blank, avg) {
         .orient("right")
         .tickSize(13)
         .tickFormat(function(d) { return tFormat(d) });
+        
+    var rankXAxis = d3.svg.axis()
+        .scale(rankX)
+        .orient("bottom");
+        
+    var rankYAxis = d3.svg.axis()
+        .scale(rankY)
+        .orient("left");
         
     var keyG = oSvg.append("g")
         .attr("class", "key axis")
@@ -246,7 +294,15 @@ function ready(error, town, neigh, blank, avg) {
             d3.select("#current")
                 .text(ident + " in " + curYear);
             d3.select("#avg")
-                .text("Average property value: $" + nFormat(data[id][curYear]));
+                .text("Average price/square foot: $" + nFormat(data[id][curYear]));
+            rSvg.selectAll("circle")
+                .data(perc[id])
+                .attr("cx", function(d) { return rankX(format.parse(d[0])) })
+                .attr("cy", function(d) { return rankY(d[1]) })
+              .enter().append("circle")
+                .attr("cx", function(d) { return rankX(format.parse(d[0])) })
+                .attr("cy", function(d) { return rankY(d[1]) })
+                .attr("r", 1);
         } else {
             d3.selectAll("#current, #avg").text(null);
         }

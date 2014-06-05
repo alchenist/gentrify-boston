@@ -11,6 +11,7 @@ import sys
 import json
 import csv
 import dbf
+import string
 from collections import defaultdict
 
 def median(list):
@@ -28,6 +29,7 @@ def main():
     newdata = defaultdict(lambda: defaultdict(list))
     years = set()
     alldata = defaultdict(list)
+    delcommas = {ord(char): None for char in string.punctuation}
     
     with open(sys.argv[2], 'rb') as f:
         data = json.load(f)
@@ -35,8 +37,11 @@ def main():
             if not(record.pid_long in data): continue
             datum = data[record.pid_long]
             ward_preci = ''.join(record.wpd.strip().split("-")[:2])
+            if not 'Living Area' in datum: continue
+            sqft = int(datum['Living Area'].split()[0].translate(delcommas  ))
+            if sqft == 0: continue
             for year in datum['values']:
-                newdata[ward_preci][year].append(datum['values'][year]['val'])
+                newdata[ward_preci][year].append(datum['values'][year]['val']/sqft)
                 years.add(year)
         
     fieldnames = ['ward_preci'] + sorted(list(years))
